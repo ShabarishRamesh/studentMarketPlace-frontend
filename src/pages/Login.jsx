@@ -1,44 +1,57 @@
 import { useState, useEffect } from "react";
-import { signInWithEmailAndPassword } from "firebase/auth";
-import API from "../api/axios";
 import { useNavigate } from "react-router-dom";
+import { signInWithEmailAndPassword } from "firebase/auth";
 import { auth } from "../firebase";
+import API from "../api/axios"; // Axios instance with Authorization header
 
 function Login() {
   const [form, setForm] = useState({ email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Stay logged in if token exists
   useEffect(() => {
     const token = localStorage.getItem("token");
     if (token) navigate("/home");
   }, [navigate]);
 
   const handleSubmit = async (e) => {
-  e.preventDefault();
+    e.preventDefault();
 
-  try {
-    setLoading(true);
+    if (!form.email || !form.password) {
+      return alert("Email and password are required");
+    }
 
-    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
-      method: "POST",
-      headers: { "Content-Type": "application/json" },
-      body: JSON.stringify(form),
-    });
+    try {
+      setLoading(true);
 
-    const data = await res.json();
+      // 1️⃣ Firebase login
+      const userCredential = await signInWithEmailAndPassword(
+        auth,
+        form.email,
+        form.password
+      );
 
-    if (!res.ok) throw new Error(data.message);
+      // 2️⃣ Get Firebase ID token
+      const firebaseToken = await userCredential.user.getIdToken();
 
-    localStorage.setItem("token", data.token);
-    navigate("/home");
+      // 3️⃣ Send token to backend
+      const res = await API.post("/auth/firebase-login", { token: firebaseToken });
 
-  } catch (err) {
-    alert(err.message);
-  } finally {
-    setLoading(false);
-  }
-};
+      // 4️⃣ Store backend JWT
+      localStorage.setItem("token", res.data.token);
+
+      alert("Login successful!");
+      navigate("/home");
+
+    } catch (err) {
+      console.error(err);
+      alert(err.response?.data?.message || err.message + ". Please sign up if you don't have an account.");
+      navigate("/signup");
+    } finally {
+      setLoading(false);
+    }
+  };
 
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-r from-purple-500 to-blue-500">
@@ -62,11 +75,10 @@ function Login() {
         <button
           onClick={handleSubmit}
           disabled={loading}
-          className="w-full bg-blue-500 text-white p-2 rounded"
+          className="w-full bg-blue-500 text-white p-2 rounded hover:scale-105 transition-transform duration-300"
         >
           {loading ? "Logging in..." : "Login"}
         </button>
-        
       </div>
     </div>
   );

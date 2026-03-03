@@ -1,52 +1,58 @@
-import { useState } from "react";
-import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
+import { useState, useEffect } from "react";
 import { useNavigate } from "react-router-dom";
+import { createUserWithEmailAndPassword, updateProfile } from "firebase/auth";
 import { auth } from "../firebase";
+import API from "../api/axios"; // Axios instance with Authorization header
 
 function Signup() {
   const [form, setForm] = useState({ name: "", email: "", password: "" });
   const [loading, setLoading] = useState(false);
   const navigate = useNavigate();
 
+  // Stay logged in if token exists
+  useEffect(() => {
+    const token = localStorage.getItem("token");
+    if (token) navigate("/home");
+  }, [navigate]);
+
   const handleSubmit = async (e) => {
     e.preventDefault();
 
     if (!form.name || !form.email || !form.password) {
-      return alert("All fields required");
+      return alert("All fields are required");
     }
 
     try {
       setLoading(true);
 
-      // 1️⃣ Firebase signup
+      // 1️⃣ Create user in Firebase
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         form.email,
         form.password
       );
 
+      // 2️⃣ Update display name
       await updateProfile(userCredential.user, { displayName: form.name });
 
-      // 2️⃣ Save to MongoDB
-      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
-        method: "POST",
-        headers: { "Content-Type": "application/json" },
-        body: JSON.stringify({
-          name: form.name,
-          email: form.email,
-          password: form.password
-        }),
-      });
+      // 3️⃣ Get Firebase ID token
+      const firebaseToken = await userCredential.user.getIdToken();
 
-      const data = await res.json();
+      // 4️⃣ Send to backend (MongoDB) with Firebase token
+      const res = await API.post(
+        "/auth/firebase-login",
+        { token: firebaseToken }
+      );
 
-      if (!res.ok) throw new Error(data.message || "MongoDB signup failed");
+      // 5️⃣ Store backend JWT in localStorage
+      localStorage.setItem("token", res.data.token);
 
-      alert("Signup successful! Please login.");
+      alert("Signup successful! You are now logged in.");
       navigate("/");
 
     } catch (err) {
-      alert(err.message);
+      console.error(err);
+      alert(err.response?.data?.message || err.message);
     } finally {
       setLoading(false);
     }
@@ -77,7 +83,11 @@ function Signup() {
           onChange={(e) => setForm({ ...form, password: e.target.value })}
         />
 
-        <button className="w-full bg-purple-500 text-white p-2 rounded" onClick={handleSubmit} disabled={loading}>
+        <button
+          onClick={handleSubmit}
+          disabled={loading}
+          className="w-full bg-purple-500 text-white p-2 rounded hover:scale-105 transition-transform duration-300"
+        >
           {loading ? "Signing up..." : "Signup"}
         </button>
       </div>
