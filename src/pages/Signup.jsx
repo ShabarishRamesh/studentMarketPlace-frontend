@@ -17,21 +17,37 @@ function Signup() {
 
     try {
       setLoading(true);
+
+      // 1️⃣ Firebase signup
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         form.email,
         form.password
       );
 
-      await updateProfile(userCredential.user, {
-        displayName: form.name,
+      await updateProfile(userCredential.user, { displayName: form.name });
+
+      // 2️⃣ Save to MongoDB
+      const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/signup`, {
+        method: "POST",
+        headers: { "Content-Type": "application/json" },
+        body: JSON.stringify({
+          name: form.name,
+          email: form.email,
+          password: form.password
+        }),
       });
 
-      alert("Signup successful. Please login.");
+      const data = await res.json();
+
+      if (!res.ok) throw new Error(data.message || "MongoDB signup failed");
+
+      alert("Signup successful! Please login.");
       navigate("/");
+
     } catch (err) {
       alert(err.message);
-    } finally{
+    } finally {
       setLoading(false);
     }
   };

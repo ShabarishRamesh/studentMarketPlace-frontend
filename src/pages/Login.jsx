@@ -15,42 +15,30 @@ function Login() {
   }, [navigate]);
 
   const handleSubmit = async (e) => {
-    e.preventDefault();
+  e.preventDefault();
 
-    if (!form.email || !form.password) {
-      return alert("Please fill all fields");
-    }
+  try {
+    setLoading(true);
 
-    try {
-      setLoading(true);
+    const res = await fetch(`${import.meta.env.VITE_API_URL}/api/auth/login`, {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify(form),
+    });
 
-      // Firebase login
-      const userCredential = await signInWithEmailAndPassword(
-        auth,
-        form.email,
-        form.password
-      );
+    const data = await res.json();
 
-      // Get Firebase token
-      const firebaseToken = await userCredential.user.getIdToken();
+    if (!res.ok) throw new Error(data.message);
 
-      // Send to backend
-      const res = await API.post("/auth/firebase-login", {
-        token: firebaseToken,
-      });
+    localStorage.setItem("token", data.token);
+    navigate("/home");
 
-      // Store JWT
-      localStorage.setItem("token", res.data.token);
-
-      navigate("/dashboard");
-    } catch (err) {
-      console.log(err.response?.data || err.message);
-      alert("Invalid email or password, Signup if you don't have an account.");
-      navigate("/signup");
-    } finally {
-      setLoading(false);
-    }
-  };
+  } catch (err) {
+    alert(err.message);
+  } finally {
+    setLoading(false);
+  }
+};
 
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-r from-purple-500 to-blue-500">
