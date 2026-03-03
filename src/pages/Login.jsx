@@ -36,7 +36,7 @@ function Login() {
       const firebaseToken = await userCredential.user.getIdToken();
 
       // 3️⃣ Send token to backend
-      const res = await API.post("/auth/firebase-login", { token: firebaseToken });
+      const res = await API.post("auth/login", { token: firebaseToken });
 
       // 4️⃣ Store backend JWT
       localStorage.setItem("token", res.data.token);

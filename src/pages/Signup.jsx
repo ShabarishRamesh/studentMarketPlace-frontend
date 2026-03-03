@@ -19,36 +19,34 @@ function Signup() {
     e.preventDefault();
 
     if (!form.name || !form.email || !form.password) {
-      return alert("All fields are required");
+      return alert("All fields required");
     }
 
     try {
       setLoading(true);
 
-      // 1️⃣ Create user in Firebase
+      // 1️⃣ Firebase signup
       const userCredential = await createUserWithEmailAndPassword(
         auth,
         form.email,
         form.password
       );
 
-      // 2️⃣ Update display name
+      // Set display name in Firebase
       await updateProfile(userCredential.user, { displayName: form.name });
 
-      // 3️⃣ Get Firebase ID token
-      const firebaseToken = await userCredential.user.getIdToken();
+      // 2️⃣ Backend MongoDB signup
+      const res = await API.post("/auth/signup", {
+        name: form.name,
+        email: form.email,
+        password: form.password, // plaintext, backend hashes it
+      });
 
-      // 4️⃣ Send to backend (MongoDB) with Firebase token
-      const res = await API.post(
-        "/auth/firebase-login",
-        { token: firebaseToken }
-      );
-
-      // 5️⃣ Store backend JWT in localStorage
+      // 3️⃣ Store backend JWT
       localStorage.setItem("token", res.data.token);
 
-      alert("Signup successful! You are now logged in.");
-      navigate("/");
+      alert("Signup successful! Redirecting to dashboard...");
+      navigate("/dashboard");
 
     } catch (err) {
       console.error(err);
@@ -57,6 +55,7 @@ function Signup() {
       setLoading(false);
     }
   };
+
 
   return (
     <div className="h-screen flex items-center justify-center bg-gradient-to-r from-pink-500 to-purple-500">
