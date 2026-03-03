@@ -1,16 +1,121 @@
-# React + Vite
+Student Marketplace
 
-This template provides a minimal setup to get React working in Vite with HMR and some ESLint rules.
+A full-stack MERN project with Firebase Authentication. Backend is deployed on Render, frontend on Vercel.
 
-Currently, two official plugins are available:
+🔹 Features
 
-- [@vitejs/plugin-react](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react) uses [Babel](https://babeljs.io/) (or [oxc](https://oxc.rs) when used in [rolldown-vite](https://vite.dev/guide/rolldown)) for Fast Refresh
-- [@vitejs/plugin-react-swc](https://github.com/vitejs/vite-plugin-react/blob/main/packages/plugin-react-swc) uses [SWC](https://swc.rs/) for Fast Refresh
+Firebase Google & Email/Password Authentication
 
-## React Compiler
+JWT-based backend authentication
 
-The React Compiler is not enabled on this template because of its impact on dev & build performances. To add it, see [this documentation](https://react.dev/learn/react-compiler/installation).
+MongoDB database for storing users and marketplace data
 
-## Expanding the ESLint configuration
+Cloudinary image uploads
 
-If you are developing a production application, we recommend using TypeScript with type-aware lint rules enabled. Check out the [TS template](https://github.com/vitejs/vite/tree/main/packages/create-vite/template-react-ts) for information on how to integrate TypeScript and [`typescript-eslint`](https://typescript-eslint.io) in your project.
+Responsive UI with Tailwind CSS
+
+🔹 Tech Stack
+
+Frontend: React, Tailwind CSS, Axios, Firebase Auth
+
+Backend: Node.js, Express, MongoDB, Mongoose, Firebase Admin SDK
+
+Deployment: Vercel (frontend), Render (backend)
+
+🔹 Project Structure
+StudentMarketplace/
+├─ frontend/
+│  ├─ src/
+│  │  ├─ api/axios.js       # Axios instance
+│  │  ├─ firebase.js        # Firebase config
+│  │  └─ pages/Login.jsx
+│  │  └─ pages/Signup.jsx
+│  └─ .env                  # Frontend env variables
+├─ backend/
+│  ├─ models/User.js        # Mongoose user model
+│  ├─ routes/auth.js        # Auth routes
+│  ├─ server.js             # Entry point
+│  └─ firebaseServiceKey.json # Firebase Admin SDK (gitignored!)
+│  └─ .env                  # Backend env variables
+🔹 Environment Variables
+Backend (backend/.env)
+PORT=3500
+MONGO_URI=your_mongodb_connection_string
+JWT_SECRET=your_jwt_secret
+
+Make sure firebaseServiceKey.json is gitignored and not pushed to GitHub.
+
+Frontend (frontend/.env)
+VITE_API_URL=https://studentmarketplace-backend.onrender.com/api
+VITE_FIREBASE_API_KEY=your_api_key
+VITE_FIREBASE_AUTH_DOMAIN=your_project.firebaseapp.com
+VITE_FIREBASE_PROJECT_ID=your_project_id
+VITE_FIREBASE_STORAGE_BUCKET=your_bucket
+VITE_FIREBASE_MESSAGING_SENDER_ID=your_messaging_id
+VITE_FIREBASE_APP_ID=your_app_id
+VITE_FIREBASE_MEASUREMENT_ID=your_measurement_id
+
+Replace values with your Firebase project config.
+
+🔹 Getting Started (Local Development)
+Backend
+cd backend
+npm install
+npm start
+Frontend
+cd frontend
+npm install
+npm run dev
+
+Your frontend will now use the backend API at VITE_API_URL.
+
+🔹 Deployment
+Backend (Render)
+
+Create a new Web Service on Render.
+
+Connect your backend GitHub repo.
+
+Set environment variables in Render Dashboard (MONGO_URI, JWT_SECRET).
+
+Deploy.
+
+Copy the deployed URL and use it in frontend .env as VITE_API_URL.
+
+Frontend (Vercel)
+
+Import your frontend GitHub repo into Vercel.
+
+Add environment variables in Vercel (same as frontend .env).
+
+Set VITE_API_URL to your Render backend URL + /api.
+
+Deploy.
+
+🔹 Firebase Integration
+
+frontend/src/firebase.js handles Firebase config and Auth initialization.
+
+backend/firebaseAdmin.js handles Firebase Admin SDK for token verification.
+
+Backend routes verify Firebase tokens and generate JWT for client-side auth.
+
+
+🔹 Usage
+
+Signup/Login using Email & Password 
+
+Authenticated API requests automatically attach JWT token.
+
+Explore and add marketplace items.
+
+
+🔹 Notes
+
+Ensure .gitignore contains:
+
+node_modules
+.env
+firebaseServiceKey.json
+
+Never push secrets like firebaseServiceKey.json or .env to GitHub.
