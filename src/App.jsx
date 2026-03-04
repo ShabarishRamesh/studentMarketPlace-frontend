@@ -22,30 +22,15 @@ function App() {
 
         <Route
           path="/dashboard"
-          element={
-            <ProtectedRoute>
-              <Dashboard />
-            </ProtectedRoute>
-          }
-        />
+          element={<Dashboard />}/>
 
         <Route
           path="/addproduct"
-          element={
-            <ProtectedRoute>
-              <AddProduct />
-            </ProtectedRoute>
-          }
-        />
+          element={<AddProduct />}/>
 
         <Route
           path="/products"
-          element={
-            <ProtectedRoute>
-              <Products />
-            </ProtectedRoute>
-          }
-        />
+          element={<Products />}/>
         <Route path="/cart" element={<Cart />} />
         <Route path="/search" element={<ProductsSearch />} />
         <Route path="/home" element={<Home />} />
