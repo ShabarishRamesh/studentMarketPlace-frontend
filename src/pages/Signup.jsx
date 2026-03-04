@@ -36,7 +36,7 @@ function Signup() {
       await updateProfile(userCredential.user, { displayName: form.name });
 
       // 2️⃣ Backend MongoDB signup
-      const res = await API.post("/signup", {
+      const res = await API.post("/auth/signup", {
         name: form.name,
         email: form.email,
         password: form.password, // plaintext, backend hashes it
